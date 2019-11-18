@@ -30,10 +30,10 @@ use CodeIgniter\Database\ConnectionInterface;
         else {
             $this->db = \Config\Database::connect();
         }
+        $this->builder = $this->db->table($this->table);
     }
 
-    function getNetworks(string $cols = null, array $conds = null, array $groupby = null, bool $isDistinct = false, int $limit = -1, int $offset = -1){
-		$this->builder = $this->db->table($this->table);
+    public function getNetworks(string $cols = null, array $conds = null, array $groupby = null, bool $isDistinct = false, int $limit = -1, int $offset = -1){
 		
 		if ($cols) {
             $this->builder->select($cols);
@@ -58,7 +58,29 @@ use CodeIgniter\Database\ConnectionInterface;
         return $query; 
     }
 
+    public function createNetwork(array $data): int
+    {
+        try {
+            $this->builder->insert($data);
+            return $this->db->insertID();
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            return -1;
+        }
+    }
 
+    public function addInstallationToNetwork(string $installation_key, int $network_key): bool
+    {
+        try {
+            $this->builder = $this->db->table('installations_networks');
+            $this->builder->insert(['installation_key' => $installation_key, 'network_key' => $network_key]);
+            return true;
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            return false;
+        }
+        return false;
+    }
 
 
  }
