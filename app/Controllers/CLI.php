@@ -17,7 +17,7 @@ use Psr\Log\LoggerInterface;
 
 class CLI extends Controller
 {
-    public function initCotroller(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
         parent::initController($request, $response, $logger);
     }
