@@ -14,9 +14,8 @@ class APIResponse
     private $status;
     private $message;
 
-    public function __construct(int $status = null, string $message = null) {
+    public function __construct(int $status = null) {
         $this->status = $status;
-        $this->message = $message;
     }
 
     public function getStatus(): int
@@ -24,7 +23,7 @@ class APIResponse
         return $this->status;
     }
 
-    public function setStatus(int $status): int
+    public function setStatus(int $status)
     {
         $this->status = $status;
     }
@@ -34,7 +33,7 @@ class APIResponse
         return $this->message;
     }
 
-    public function setMessage(string $message): int
+    public function setMessage(string $message)
     {
         $this->message = $message;
     }
