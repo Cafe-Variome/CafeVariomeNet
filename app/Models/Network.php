@@ -86,6 +86,21 @@ use CodeIgniter\Database\ConnectionInterface;
         return $query; 
     }
 
+    public function getNetworksByInstallationKey(string $installationKey)
+    {
+        $this->builder->select('*');
+        $this->builder->join('installations_networks', 'installations_networks.network_key = '.$this->table.'.network_key');
+        $this->builder->where('installations_networks.installation_key', $installationKey);
+        
+        try {
+            $results = $this->builder->get()->getResultArray();
+            $this->initiateResponse(1, $results);
+        } catch (\Exception $ex) {
+            $this->initiateResponse(0);
+            $this->setResponseMessage($ex->getMessage());
+        }
+    }
+
     public function createNetwork(array $data, bool $uniquename = false): int
     {
         try {

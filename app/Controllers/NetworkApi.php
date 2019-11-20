@@ -77,4 +77,15 @@ class NetworkApi extends ResourceController{
         return $this->respond($networkModel->getResponseJSON());      
     }
 
+    public function getNetworksByInstallationKey()
+    {
+        $installation_key = $this->request->getVar("installation_key");
+
+        $networkModel = new Network();
+
+        $networkModel->getNetworksByInstallationKey($installation_key);
+
+        return $this->respond($networkModel->getResponseJSON());
+    }
+
 }
