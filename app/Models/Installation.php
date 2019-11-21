@@ -23,6 +23,8 @@ class Installation extends Model
 
     protected $db;
     protected $builder;
+    
+    public $response;
 
     public function __construct(ConnectionInterface &$db = null){
         if ($db != null) {
@@ -31,12 +33,36 @@ class Installation extends Model
         else {
             $this->db = \Config\Database::connect();
         }
+        $this->builder = $this->db->table($this->table);
+    }
+
+    private function initiateResponse(int $status, array $data = null)
+    {
+        $this->response = new NetworkAPIResponse($status, $data);
+    }
+
+    private function setResponseMessage(string $message)
+    {
+        $this->response->setMessage($message);
+    }
+
+    public function getResponse(): NetworkAPIResponse
+    {
+        return $this->response;
+    }
+
+    public function getResponseArray(): array
+    {
+        return $this->response->toArray();
+    }
+
+    public function getResponseJSON(): string
+    {
+        return $this->response->toJSON();
     }
 
     public function createInstallation(string $name, string $base_url):string
     {
-        $this->builder = $this->db->table($this->table);
-
         //generate installation key
         $keyGen = new KeyGen();
         $installation_key = $keyGen->generateInstallationKey();
@@ -52,10 +78,10 @@ class Installation extends Model
         return $installation_key;
     }
 
-    function getInstallations(string $cols = null, array $conds = null, array $groupby = null, bool $isDistinct = false, int $limit = -1, int $offset = -1){
-		$this->builder = $this->db->table($this->table);
-		
-		if ($cols) {
+    function getInstallations(string $cols = null, array $conds = null, array $groupby = null, bool $isDistinct = false, int $limit = -1, int $offset = -1)
+    {
+
+        if ($cols) {
             $this->builder->select($cols);
         }
         if ($conds) {
@@ -76,5 +102,20 @@ class Installation extends Model
 
         $query = $this->builder->get()->getResultArray();
         return $query; 
+    }
+
+    public function getInstallationsByNetworkKey(int $network_key)
+    {
+        $this->builder->select('*');
+        $this->builder->join('installations_networks', 'installations_networks.installation_key = '.$this->table.'.installation_key');
+        $this->builder->where('installations_networks.network_key', $network_key);
+        
+        try {
+            $results = $this->builder->get()->getResultArray();
+            $this->initiateResponse(1, $results);
+        } catch (\Exception $ex) {
+            $this->initiateResponse(0);
+            $this->setResponseMessage($ex->getMessage());
+        }
     }
 }
