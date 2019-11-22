@@ -86,6 +86,13 @@ use CodeIgniter\Database\ConnectionInterface;
         return $query; 
     }
 
+    public function updateNetworks(array $data, array $conds = null) {
+        if ($conds) {
+            $this->builder->where($conds);
+        }
+        $this->builder->update($data);
+    }
+
     public function getNetworksByInstallationKey(string $installationKey)
     {
         $this->builder->select('*');
@@ -141,6 +148,36 @@ use CodeIgniter\Database\ConnectionInterface;
         return false;
     }
 
+    public function getNetworkThreshold(int $network_key): int
+    {
+        try {
+            $networks = $this->getNetworks('network_threshold', ['network_key' => $network_key]);
+            if (count($networks) == 1) {
+                $this->initiateResponse(1, $networks[0]);
+                return $networks[0]['network_threshold'];
+            }
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            $this->initiateResponse(0);
+            $this->setResponseMessage($ex->getMessage());
+        }
+        return -1;
+    }
+
+    public function setNetworkThreshold(int $network_key, int $network_threshold): bool
+    {
+        $data = ['network_threshold' =>  $network_threshold];
+        try {
+            $this->updateNetworks($data, ['network_key' => $network_key]);
+            $this->initiateResponse(1);
+            return true;
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            $this->initiateResponse(0);
+            $this->setResponseMessage($ex->getMessage());
+        }
+        return false;
+    }
 
  }
    
