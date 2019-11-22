@@ -88,4 +88,26 @@ class NetworkApi extends ResourceController{
         return $this->respond($networkModel->getResponseJSON());
     }
 
+    public function getNetworkThreshold()
+    {
+        $network_key = $this->request->getVar('network_key');
+
+        $networkModel = new Network();
+
+        $networkModel->getNetworkThreshold((int)$network_key);
+
+        return $this->respond($networkModel->getResponseJSON());
+    }
+
+    public function setNetworkThreshold()
+    {
+        $network_key = $this->request->getVar('network_key');
+        $network_threshold = $this->request->getVar('network_threshold');
+
+        $networkModel = new Network();
+        $networkModel->setNetworkThreshold($network_key, $network_threshold);
+
+        return $this->respond($networkModel->getResponseJSON());
+    }
+
 }
