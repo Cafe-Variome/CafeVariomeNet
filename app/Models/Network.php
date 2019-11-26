@@ -93,6 +93,26 @@ use CodeIgniter\Database\ConnectionInterface;
         $this->builder->update($data);
     }
 
+    public function getNetwork(int $network_key): array
+    {
+        try {
+            $network = $this->getNetworks(null, ['network_key' => $network_key]);
+
+            if (count($network) == 1) {
+                $this->initiateResponse(1, $network[0]);
+                return $network[0];
+            }
+            else {
+                $this->initiateResponse(1);
+            }
+        } catch (\Exception $ex) {
+            $this->initiateResponse(0);
+            $this->setResponseMessage($ex->getMessage());
+        }
+
+        return [];
+    }
+
     public function getNetworksByInstallationKey(string $installationKey)
     {
         $this->builder->select('*');
@@ -175,6 +195,36 @@ use CodeIgniter\Database\ConnectionInterface;
             error_log($ex->getMessage());
             $this->initiateResponse(0);
             $this->setResponseMessage($ex->getMessage());
+        }
+        return false;
+    }
+
+    public function leaveNetwork(string $installation_key, int $network_key): bool
+    {
+        $this->builder = $this->db->table('installations_networks');
+
+        try {
+            $this->builder->where(['network_key' => $network_key]);
+            $installationCount = $this->builder->countAllResults();
+
+            $this->builder->where(['installation_key' => $installation_key, 'network_key' => $network_key]);
+            $this->builder->delete();
+
+
+            if ($installationCount == 1) {
+                //Delete the network entity as well.
+                $this->builder = $this->db->table($this->table);
+                $this->builder->where(['network_key' => $network_key]);
+                $this->builder->delete();
+            }
+
+            $this->initiateResponse(1);
+            return true;
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            $this->initiateResponse(0);
+            $this->setResponseMessage($ex->getMessage());
+            return false;
         }
         return false;
     }

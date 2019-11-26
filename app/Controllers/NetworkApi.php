@@ -77,6 +77,16 @@ class NetworkApi extends ResourceController{
         return $this->respond($networkModel->getResponseJSON());      
     }
 
+    public function getNetwork()
+    {
+        $network_key = $this->request->getVar("network_key");
+
+        $networkModel = new Network();
+        $networkModel->getNetwork((int)$network_key);
+
+        return $this->respond($networkModel->getResponseJSON());
+    }
+
     public function getNetworksByInstallationKey()
     {
         $installation_key = $this->request->getVar("installation_key");
@@ -110,4 +120,14 @@ class NetworkApi extends ResourceController{
         return $this->respond($networkModel->getResponseJSON());
     }
 
+    public function leaveNetwork()
+    {
+        $network_key = $this->request->getVar('network_key');
+        $installation_key = $this->request->getVar("installation_key");
+
+        $networkModel = new Network();
+        $networkModel->leaveNetwork($installation_key, (int)$network_key);
+
+        return $this->respond($networkModel->getResponseJSON());
+    }
 }
