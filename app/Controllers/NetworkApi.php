@@ -25,18 +25,24 @@ class NetworkApi extends ResourceController{
 
     private $networkModel;
 
+    private $installation_key;
+
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
         parent::initController($request, $response, $logger);
+ 
+        $this->validateInstallation();
     }
 
-    public function validateInstallation()
+    public function validateInstallation() 
     {
-        $key = $this->request->getVar("installation_key");
+        $this->installation_key = $this->request->getVar("installation_key");
 
-        $isValid = \App\Libraries\Net\CafeVariomeNet::validateInstallation($key);
-        return $this->respond($isValid);
-
+        $isValid = \App\Libraries\Net\CafeVariomeNet::validateInstallation($this->installation_key);
+        if (!$isValid) {
+            echo json_encode('Unauthorised.');
+            exit;
+        }
     }
 
     public function getNetworks()
@@ -127,6 +133,14 @@ class NetworkApi extends ResourceController{
 
         $networkModel = new Network();
         $networkModel->leaveNetwork($installation_key, (int)$network_key);
+
+        return $this->respond($networkModel->getResponseJSON());
+    }
+
+    public function getAvailableNetworks()
+    {
+        $networkModel = new Network();
+        $networkModel->getAvailableNetworks($this->installation_key);
 
         return $this->respond($networkModel->getResponseJSON());
     }

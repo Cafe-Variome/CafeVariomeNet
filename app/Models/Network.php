@@ -229,5 +229,20 @@ use CodeIgniter\Database\ConnectionInterface;
         return false;
     }
 
+    public function getAvailableNetworks(string $installation_key)
+    {
+        $this->builder->select('*');
+        $this->builder->join('installations_networks', 'installations_networks.network_key = '.$this->table.'.network_key');
+        $this->builder->where('installations_networks.installation_key != ', $installation_key);
+        
+        try {
+            $results = $this->builder->get()->getResultArray();
+            $this->initiateResponse(1, $results);
+        } catch (\Exception $ex) {
+            $this->initiateResponse(0);
+            $this->setResponseMessage($ex->getMessage());
+        }
+
+    }
  }
    
