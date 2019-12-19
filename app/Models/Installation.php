@@ -110,12 +110,6 @@ class Installation extends Model
         $this->builder->join('installations_networks', 'installations_networks.installation_key = '.$this->table.'.installation_key');
         $this->builder->where('installations_networks.network_key', $network_key);
         
-        try {
-            $results = $this->builder->get()->getResultArray();
-            $this->initiateResponse(1, $results);
-        } catch (\Exception $ex) {
-            $this->initiateResponse(0);
-            $this->setResponseMessage($ex->getMessage());
-        }
+        return $this->builder->get()->getResultArray();
     }
 }
