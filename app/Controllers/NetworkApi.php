@@ -21,17 +21,27 @@ use Psr\Log\LoggerInterface;
 
 use App\Models\Network;
 
+use App\Libraries\CafeVariomeNet\Core\APIResponseBundle;
+use App\Libraries\CafeVariomeNet\Core\NetworkCore;
+
 class NetworkApi extends ResourceController{
 
     private $networkModel;
 
     private $installation_key;
 
+    private $networkCoreInstance;
+
+    private $responseBundleInstance;
+
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
         parent::initController($request, $response, $logger);
  
         $this->validateInstallation();
+
+        $this->networkCoreInstance = new NetworkCore();
+        $this->responseBundleInstance = new APIResponseBundle();
     }
 
     public function validateInstallation() 
@@ -45,30 +55,40 @@ class NetworkApi extends ResourceController{
         }
     }
 
-    public function getNetworks()
-    {
-        $networkModel = new Network();
-        return $this->respond($networkModel->getNetworks());
-    }
-
     public function createNetwork()
     {
         $network_name = $this->request->getVar("network_name");
         $network_type = $this->request->getVar("network_type");
         $network_threashold = $this->request->getVar("network_threshold");
         $network_status = $this->request->getVar("network_status");
+
 		$data = ['network_name' => $network_name,
 				 'network_type' => $network_type,
 				 'network_threshold' => $network_threashold,
 				 'network_status' => $network_status
-
                 ]; 
 
-        $networkModel = new Network();
-        
-        $networkModel->createNetwork($data, true);
+        try {
+            $network_key = $this->networkCoreInstance->createNetwork($data, true);
 
-        return $this->respond($networkModel->getResponseJSON());      
+            if ($network_key == 0) {
+                $this->responseBundleInstance->initiateResponse(0);
+                $this->responseBundleInstance->setResponseMessage('Network name is not unique.');
+            }
+            elseif ($network_key == -1) {
+                $this->responseBundleInstance->initiateResponse(0);
+            }
+            else {
+                $this->responseBundleInstance->initiateResponse(1, ['network_key' => $network_key]);
+            }
+        }
+        catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            $this->responseBundleInstance->initiateResponse(0);
+            $this->responseBundleInstance->setResponseMessage($ex->getMessage());
+        }
+
+        return $this->respond($this->responseBundleInstance->getResponseJSON());
     }
 
     public function addInstallationToNetwork()
@@ -76,11 +96,16 @@ class NetworkApi extends ResourceController{
         $installation_key = $this->request->getVar("installation_key");
         $network_key = $this->request->getVar("network_key");
 
-        $networkModel = new Network();
-
-        $networkModel->addInstallationToNetwork($installation_key, $network_key);
+        try {
+            $this->networkCoreInstance->addInstallationToNetwork($installation_key, $network_key);
+            $this->responseBundleInstance->initiateResponse(1);
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            $this->responseBundleInstance->initiateResponse(0);
+            $this->responseBundleInstance->setResponseMessage($ex->getMessage());
+        }
         
-        return $this->respond($networkModel->getResponseJSON());      
+        return $this->respond($this->responseBundleInstance->getResponseJSON());
     }
 
     public function getNetwork()
@@ -97,22 +122,38 @@ class NetworkApi extends ResourceController{
     {
         $installation_key = $this->request->getVar("installation_key");
 
-        $networkModel = new Network();
+        try {
+            $networks = $this->networkCoreInstance->getNetworksByInstallationKey($installation_key);
+            $this->responseBundleInstance->initiateResponse(1, $networks);
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            $this->responseBundleInstance->initiateResponse(0);
+            $this->responseBundleInstance->setResponseMessage($ex->getMessage());
+        }
 
-        $networkModel->getNetworksByInstallationKey($installation_key);
-
-        return $this->respond($networkModel->getResponseJSON());
+        return $this->respond($this->responseBundleInstance->getResponseJSON());
     }
 
     public function getNetworkThreshold()
     {
         $network_key = $this->request->getVar('network_key');
 
-        $networkModel = new Network();
+        try {
+            $network_threshold = $this->networkCoreInstance->getNetworkThreshold((int)$network_key);
+            if ($network_threshold != -1) {
+                $this->responseBundleInstance->initiateResponse(1, ['network_threshold' => $network_threshold]);
+            }
+            else {
+                $this->responseBundleInstance->initiateResponse(0);
+                $this->responseBundleInstance->setResponseMessage('Network not found.');
+            }
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            $this->responseBundleInstance->initiateResponse(0);
+            $this->responseBundleInstance->setResponseMessage($ex->getMessage());
+        }
 
-        $networkModel->getNetworkThreshold((int)$network_key);
-
-        return $this->respond($networkModel->getResponseJSON());
+        return $this->respond($this->responseBundleInstance->getResponseJSON());
     }
 
     public function setNetworkThreshold()
@@ -120,10 +161,21 @@ class NetworkApi extends ResourceController{
         $network_key = $this->request->getVar('network_key');
         $network_threshold = $this->request->getVar('network_threshold');
 
-        $networkModel = new Network();
-        $networkModel->setNetworkThreshold($network_key, $network_threshold);
+        try {
+            $result = $this->networkCoreInstance->setNetworkThreshold($network_key, $network_threshold);
+            if ($result) {
+                $this->responseBundleInstance->initiateResponse(1);
+            }
+            else {
+                $this->responseBundleInstance->initiateResponse(0);
+            }
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            $this->responseBundleInstance->initiateResponse(0);
+            $this->responseBundleInstance->setResponseMessage($ex->getMessage());
+        }
 
-        return $this->respond($networkModel->getResponseJSON());
+            return $this->respond($this->responseBundleInstance->getResponseJSON());
     }
 
     public function leaveNetwork()
@@ -131,17 +183,54 @@ class NetworkApi extends ResourceController{
         $network_key = $this->request->getVar('network_key');
         $installation_key = $this->request->getVar("installation_key");
 
-        $networkModel = new Network();
-        $networkModel->leaveNetwork($installation_key, (int)$network_key);
+        try {
+            $this->networkCoreInstance->leaveNetwork($installation_key, (int)$network_key);
+            $this->responseBundleInstance->initiateResponse(1);
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            $this->responseBundleInstance->initiateResponse(0);
+            $this->responseBundleInstance->setResponseMessage($ex->getMessage());
+        }
 
-        return $this->respond($networkModel->getResponseJSON());
+        return $this->respond($this->responseBundleInstance->getResponseJSON());
     }
 
     public function getAvailableNetworks()
     {
-        $networkModel = new Network();
-        $networkModel->getAvailableNetworks($this->installation_key);
+        try {
+            $networks = $this->networkCoreInstance->getAvailableNetworks($this->installation_key);
+            $this->responseBundleInstance->initiateResponse(1, $networks);
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            $this->responseBundleInstance->initiateResponse(0);
+            $this->responseBundleInstance->setResponseMessage($ex->getMessage());
+        }
 
-        return $this->respond($networkModel->getResponseJSON());
+        return $this->respond($this->responseBundleInstance->getResponseJSON());
+    }
+
+    public function requestToJoinNetwork()
+    {
+        $network_key = $this->request->getVar('network_key');
+        $email = $this->request->getVar('email');
+        $justification = $this->request->getVar('justification');
+
+        try {
+            $joinNetworkStatus = $this->networkCoreInstance->requestToJoinNetwork($this->installation_key, (int)$network_key, $justification, $email, $this->request->getIPAddress());
+            if($joinNetworkStatus)
+            {
+                $this->responseBundleInstance->initiateResponse(1);
+            }
+            else
+            {
+                $this->responseBundleInstance->initiateResponse(0);
+            }
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            $this->responseBundleInstance->initiateResponse(0);
+            $this->responseBundleInstance->setResponseMessage($ex->getMessage());
+        }
+
+        return $this->respond($this->responseBundleInstance->getResponseJSON());
     }
 }
