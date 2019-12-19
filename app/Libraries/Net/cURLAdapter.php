@@ -48,6 +48,14 @@
         return curl_exec($this->adapterInstance);
     }
 
+    public function getHTTPResponseCode(): int
+    {
+        if (!curl_errno($this->adapterInstance)) {
+            return curl_getinfo($this->adapterInstance, CURLINFO_HTTP_CODE);
+        }
+        return -1;
+    }
+
     private function curlEnabled(): bool
     {
         return function_exists('curl_version');
