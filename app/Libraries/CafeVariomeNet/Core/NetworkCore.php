@@ -103,6 +103,8 @@ use App\Libraries\Net\NetworkInterface;
         $requestToken = $keyGen->generateNetworkRequestToken();
 
         $request = [
+            'network_key' => $network_key,
+            'installation_key' => $installation_key,
             'token' => $requestToken,
             'status' => -1 //A status of (-1) shows a pending request.
         ];
