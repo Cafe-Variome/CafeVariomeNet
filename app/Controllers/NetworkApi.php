@@ -233,4 +233,46 @@ class NetworkApi extends ResourceController{
 
         return $this->respond($this->responseBundleInstance->getResponseJSON());
     }
+
+    public function acceptRequest()
+    {
+        $token = $this->request->getVar('token');
+
+        try {
+            if($this->networkCoreInstance->acceptRequest($token)){
+                $this->responseBundleInstance->initiateResponse(1);
+            }
+            else{
+                $this->responseBundleInstance->initiateResponse(0);
+            }
+
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            $this->responseBundleInstance->initiateResponse(0);
+            $this->responseBundleInstance->setResponseMessage($ex->getMessage());
+        }
+
+        return $this->respond($this->responseBundleInstance->getResponseJSON());
+    }
+
+    public function denyRequest()
+    {
+        $token = $this->request->getVar('token');
+
+        try {
+            if($this->networkCoreInstance->denyRequest($token)){
+                $this->responseBundleInstance->initiateResponse(1);
+            }
+            else{
+                $this->responseBundleInstance->initiateResponse(0);
+            }
+
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            $this->responseBundleInstance->initiateResponse(0);
+            $this->responseBundleInstance->setResponseMessage($ex->getMessage());
+        }
+
+        return $this->respond($this->responseBundleInstance->getResponseJSON());
+    }
 }

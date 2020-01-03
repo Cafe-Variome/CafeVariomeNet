@@ -146,5 +146,46 @@ use App\Libraries\Net\NetworkInterface;
 
         return false;
     }
+
+    public function acceptRequest(string $token): bool
+    {
+        $networkRequestModel = new NetworkRequest();
+
+        $networkRequest = $networkRequestModel->getNetworkRequests('installation_key, network_key', ['token' => $token]);
+
+        if (count($networkRequest) == 1) {
+            $data = ['status' =>  1]; // Status 1 indicates an accepted request.
+
+            try {
+                $networkRequestModel->updateNetworkRequests($data, ['token' => $token]); //Update request status.
+                $this->networkModelInstance->addInstallationToNetwork($networkRequest[0]['installation_key'], $networkRequest[0]['network_key']); // Add installation to network.
+
+                return true;
+            } catch (\Exception $ex) {
+                error_log($ex->getMessage());
+            }
+        }
+        return false;
+    }
+
+    public function denyRequest(string $token): bool
+    {
+        $networkRequestModel = new NetworkRequest();
+
+        $networkRequest = $networkRequestModel->getNetworkRequests('installation_key, network_key', ['token' => $token]);
+
+        if (count($networkRequest) == 1) {
+            $data = ['status' =>  0]; // Status 0 indicates a deied request.
+
+            try {
+                $networkRequestModel->updateNetworkRequests($data, ['token' => $token]); //Update request status.
+
+                return true;
+            } catch (\Exception $ex) {
+                error_log($ex->getMessage());
+            }
+        }
+        return false;
+    }
  }
  
