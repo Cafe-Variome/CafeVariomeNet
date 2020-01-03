@@ -63,5 +63,11 @@ class NetworkRequest extends Model
         $this->builder->insert($data);
     }
 
+    public function updateNetworkRequests(array $data, array $conds = null) {
+        if ($conds) {
+            $this->builder->where($conds);
+        }
+        return $this->builder->update($data);
+    }
 
 }
