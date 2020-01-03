@@ -151,9 +151,19 @@ use CodeIgniter\Database\ConnectionInterface;
 
     public function getAvailableNetworks(string $installation_key): array
     {
-        $this->builder->select('*');
+        $this->builder->select($this->table .'.network_key');
         $this->builder->join('installations_networks', 'installations_networks.network_key = '.$this->table.'.network_key');
-        $this->builder->where('installations_networks.installation_key != ', $installation_key);
+        $this->builder->where('installations_networks.installation_key', $installation_key);
+
+        $networksInstallationIn = $this->builder->get()->getResultArray();
+        $networkKeys = [];
+
+        foreach ($networksInstallationIn as $networkKey) {
+           array_push($networkKeys, $networkKey['network_key']);
+        }
+
+        $this->builder->select('*');
+        $this->builder->whereNotIn('network_key', $networkKeys);
         
         return $this->builder->get()->getResultArray();
     }
