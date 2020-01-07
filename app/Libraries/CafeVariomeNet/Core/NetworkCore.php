@@ -37,8 +37,19 @@ use App\Libraries\Net\NetworkInterface;
     public function getNetworksByInstallationKey(string $installationKey): array
     {
         $networks = $this->networkModelInstance->getNetworksByInstallationKey($installationKey);
+        $networsWithInstallationsDetails = [];
 
-        return $networks;
+        $installationModel = new Installation();
+        foreach ($networks as $network) {
+            $installations = [];
+            $installationsInNetwork = $installationModel->getInstallationsByNetworkKey($network['network_key']);
+        
+            $network['installations_count'] = count($installationsInNetwork);
+            $network['installations'] = $installationsInNetwork;
+            array_push($networsWithInstallationsDetails, $network);
+        }
+
+        return $networsWithInstallationsDetails;
     }
 
     public function createNetwork(array $data, bool $uniquename = false): int
