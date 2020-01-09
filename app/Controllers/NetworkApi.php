@@ -23,6 +23,7 @@ use App\Models\Network;
 
 use App\Libraries\CafeVariomeNet\Core\APIResponseBundle;
 use App\Libraries\CafeVariomeNet\Core\NetworkCore;
+use App\Libraries\CafeVariomeNet\Core\InstallationCore;
 
 class NetworkApi extends ResourceController{
 
@@ -267,6 +268,23 @@ class NetworkApi extends ResourceController{
                 $this->responseBundleInstance->initiateResponse(0);
             }
 
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            $this->responseBundleInstance->initiateResponse(0);
+            $this->responseBundleInstance->setResponseMessage($ex->getMessage());
+        }
+
+        return $this->respond($this->responseBundleInstance->getResponseJSON());
+    }
+
+    public function getInstallationsByNetworkKey()
+    {
+        $network_key = $this->request->getVar('network_key');
+
+        try {
+            $installationCore = new InstallationCore();
+            $installations = $installationCore->getInstallationsByNetworkKey((int)$network_key);
+            $this->responseBundleInstance->initiateResponse(1, $installations);
         } catch (\Exception $ex) {
             error_log($ex->getMessage());
             $this->responseBundleInstance->initiateResponse(0);
