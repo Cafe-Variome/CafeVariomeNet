@@ -14,9 +14,6 @@ use App\Models\Installation;
 
 class CafeVariomeCore
 {
-
-    
-
     public static function validateInstallation(string $key = null): bool{
         $installationModel = new Installation();
         $installation = $installationModel->getInstallations('base_url', ["installation_key" => $key, "status" => 1]);
