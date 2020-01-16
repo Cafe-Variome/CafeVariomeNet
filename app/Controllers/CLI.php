@@ -33,6 +33,6 @@ class CLI extends Controller
         $key = $installationModel->createInstallation($name, $url);
 
         print("Installation created." . PHP_EOL);
-        print("Installation Key is : ". $key);
+        print("Installation Key is : ". $key . PHP_EOL);
     }
 }
