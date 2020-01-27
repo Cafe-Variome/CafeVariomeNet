@@ -40,7 +40,7 @@ class NetworkInterface
 
     public function RequestToJoinNetwork(int $network_key, string $installation_key, string $email, string $justification, string $ipAddress, string $token, string $url)
     {
-        $this->adapterw('networkapi/requestToJoinNetwork', ['network_key' => $network_key, 'installation_key' => $installation_key, 'email' => $email, 'justification' => $justification, 'ip_address' => $ipAddress, 'token' => $token, 'url' => $url]);
+        $this->adapterw('NetworkApi/requestToJoinNetwork', ['network_key' => $network_key, 'installation_key' => $installation_key, 'email' => $email, 'justification' => $justification, 'ip_address' => $ipAddress, 'token' => $token, 'url' => $url]);
         $response = $this->networkAdapter->Send();
         $this->responseCode = $this->networkAdapter->getHTTPResponseCode();
         return $this->processResponse($response);
