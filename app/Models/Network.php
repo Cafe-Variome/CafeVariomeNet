@@ -163,7 +163,9 @@ use CodeIgniter\Database\ConnectionInterface;
         }
 
         $this->builder->select('*');
-        $this->builder->whereNotIn('network_key', $networkKeys);
+        if (count($networkKeys) != 0) {
+            $this->builder->whereNotIn('network_key', $networkKeys);
+        }
         
         return $this->builder->get()->getResultArray();
     }
