@@ -113,10 +113,16 @@ class NetworkApi extends ResourceController{
     {
         $network_key = $this->request->getVar("network_key");
 
-        $networkModel = new Network();
-        $networkModel->getNetwork((int)$network_key);
+        try {
+            $networkModel = new Network();
+            $network = $networkModel->getNetwork((int)$network_key);
+            $this->responseBundleInstance->initiateResponse(1, $network);
+        } catch (\Exception $ex) {
+            $this->responseBundleInstance->initiateResponse(0);
+            $this->responseBundleInstance->setResponseMessage($ex->getMessage());
+        }
 
-        return $this->respond($networkModel->getResponseJSON());
+        return $this->respond($this->responseBundleInstance->getResponseJSON());
     }
 
     public function getNetworksByInstallationKey()
