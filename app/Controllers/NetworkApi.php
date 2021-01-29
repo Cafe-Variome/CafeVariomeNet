@@ -299,4 +299,26 @@ class NetworkApi extends ResourceController{
 
         return $this->respond($this->responseBundleInstance->getResponseJSON());
     }
+
+    public function UserDetailsForKeycloak() 
+    {
+        $user_email = $this->request->getVar('user_email');
+        $admin_email = $this->request->getVar('admin_email');
+        $first_name = $this->request->getVar('first_name');
+        $last_name = $this->request->getVar('last_name');
+        $installation_key = $this->request->getVar('installation_key');
+
+        try {
+            $emailAdapter = \Config\Services::email();
+            $credEmailInstance = EmailFactory::notifyAdmin($emailAdapter);
+            $credEmailInstance->notifyAdmin($user_email, $admin_email,$first_name, $last_name, $installation_key);
+            $credEmailInstance->send();
+        } catch (\Exception $ex) {
+            error_log($ex->getMessage());
+            $this->responseBundleInstance->initiateResponse(0);
+            $this->responseBundleInstance->setResponseMessage($ex->getMessage());
+        }
+
+        return $this->respond($this->responseBundleInstance->getResponseJSON());
+    }
 }
