@@ -19,7 +19,7 @@ class Filters extends BaseConfig
 			// 'csrf',
 		],
 		'after'  => [
-			'toolbar',
+			//'toolbar', //Please keep this line commented as it will stop debugbar script from appearing in REST Json responses
 			//'honeypot'
 		],
 	];
