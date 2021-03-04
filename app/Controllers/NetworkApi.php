@@ -43,8 +43,6 @@ class NetworkApi extends ResourceController{
 
         $this->networkCoreInstance = new NetworkCore();
         $this->responseBundleInstance = new APIResponseBundle();
-
-        $this->response->setHeader("Content-Type", "application/json");
     }
 
     public function validateInstallation() 
