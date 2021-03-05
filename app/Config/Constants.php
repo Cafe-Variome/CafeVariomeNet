@@ -75,3 +75,23 @@ defined('EXIT_USER_INPUT')     || define('EXIT_USER_INPUT', 7); // invalid user 
 defined('EXIT_DATABASE')       || define('EXIT_DATABASE', 8); // database error
 defined('EXIT__AUTO_MIN')      || define('EXIT__AUTO_MIN', 9); // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      || define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
+
+
+/**
+*--------------------------------------------------------------------------
+* Cafe Variome Net  Constants
+*--------------------------------------------------------------------------
+* 
+*/
+
+define('RESOURCES','resources' . DIRECTORY_SEPARATOR);
+define('IMAGES', RESOURCES . 'images' . DIRECTORY_SEPARATOR);
+define('JS', RESOURCES . 'js' . DIRECTORY_SEPARATOR);
+define('CSS', RESOURCES . 'css' . DIRECTORY_SEPARATOR);
+define('VENDOR','vendor' . DIRECTORY_SEPARATOR);
+
+// UI status message types
+define('STATUS_SUCCESS', 1);
+define('STATUS_ERROR', 0);
+define('STATUS_INFO', 2);
+define('STATUS_WARNING', 3);
