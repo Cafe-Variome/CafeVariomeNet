@@ -113,6 +113,14 @@ class CVUI_Controller extends Controller{
 
 	}	
 
+	/**
+	 * Sets authentication level for a view.
+	 * 
+	 * @param bool $protected Defines if a view requires authentication
+	 * @param bool $isAdmin  Defines if a view requires admin privilege
+	 * 
+	 * @return void
+	 */
 	protected function setAuthLevel(bool $protected, bool $isAdmin){
 		$this->isProtected = $protected;
 		$this->isAdmin = $isAdmin;
@@ -134,6 +142,14 @@ class CVUI_Controller extends Controller{
 		return $this->isAdmin;
 	}
 
+	/**
+	 * Check if a user is authenticated for a view that requires authentication.
+	 * 
+	 * @param $checkIsAdmin  If set to true, an additional check is carried out to make sure 
+	 * the user has admin privilege
+	 * 
+	 * @return void
+	 */
 	private function checkAuthentication(bool $checkIsAdmin) {
 		$this->session->set('_cvReturnUrl', uri_string());
 
@@ -156,6 +172,13 @@ class CVUI_Controller extends Controller{
 		}
 	}
 
+	/**
+	 * Gets URI segments after the base URL. Useful to extract controller name and method name.
+	 * 
+	 * @param bool $lowercase = true  If set to true, string values are returned as lowercase
+	 * 
+	 * @return URISegment
+	 */
 	protected function getURISegments(bool $lowercase = true)
 	{
 		$uri = \uri_string();
@@ -178,6 +201,11 @@ class CVUI_Controller extends Controller{
 		return $uriSegments;
 	}
 
+	/**
+	 * Gets the current class name.
+	 * 
+	 * @return string
+	 */
 	private function getClassName()
 	{
 		$className = get_class($this);
@@ -190,6 +218,16 @@ class CVUI_Controller extends Controller{
 		}
 	}
 
+	/**
+	 * Sets a status message as temporary flash data. Useful to send messages
+	 * 
+	 * @param string $message Message body to display.
+	 * @param int $msgtype Type of message. Used to adjust the alert colour. For more info look at aap/Config/Constants.php
+	 * @param bool $appendmsg If set to true, a string can be appended to the existing StatusMessage session.
+	 * 
+	 * @return void
+	 * 
+	 */
 	protected function setStatusMessage(string $message, int $msgtype, bool $appendmsg = false)
 	{
 		if ($appendmsg) {
@@ -212,6 +250,11 @@ class CVUI_Controller extends Controller{
 		return $this->session->getFlashData('StatusMessageType');
 	}
 
+	/**
+	 * Returns status message alert type equivalent. 
+	 * 
+	 * @return string
+	 */
 	protected function getStatusMessageTypeAlertEquivalent()
 	{
 		$msgtype = $this->getStatusMessageType();
